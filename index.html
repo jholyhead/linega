@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="line.js"></script>
+	<script type="text/javascript" src="ga.js"></script>
+	<script type="text/javascript">
+	function init(){
+		var canvasWidth = 300;
+		var canvasHeight = 200;
+	
+	
+		var imgCanvas = document.getElementById("imgCanvas");
+		var drawingCanvas = document.getElementById("tempCanvas");
+		var solutionCanvas = document.getElementById("solutionCanvas");
+		var maskCanvas = document.getElementById("maskCanvas");
+		
+		imgCanvas.width = canvasWidth;
+		imgCanvas.height = canvasHeight;
+		drawingCanvas.width = canvasWidth;
+		drawingCanvas.height = canvasHeight;
+		solutionCanvas.width = canvasWidth;
+		solutionCanvas.height = canvasHeight;
+		maskCanvas.width = canvasWidth;
+		maskCanvas.height = canvasHeight;
+		
+		var img = new Image();
+		img.onload=function(){
+			var mask = new Image();
+			mask.onload=function(){
+				var ctx = imgCanvas.getContext("2d");
+				ctx.drawImage(img,0,0, imgCanvas.width, imgCanvas.height);
+				
+				ctx = maskCanvas.getContext("2d");
+				ctx.drawImage(mask, 0, 0, maskCanvas.width, maskCanvas.height);
+
+				var ga = new GeneticAlgorithm(
+					2000,// linecount
+					75, // population size
+					0.03, // mutation rate
+					0.1, // survival rate
+					0.4, // crossover / mutation ratio
+					false, // allow limited line length?
+					imgCanvas,
+					maskCanvas,
+					drawingCanvas,
+					solutionCanvas
+					);
+				var generation = 0;
+				var fitness = 0;
+				setInterval(function(){
+					if(document.getElementById("run").checked){
+						var tempFitness = ga.evolve();
+						if(tempFitness != fitness){
+							fitness = tempFitness;
+							var str = document.getElementById("generationInfo").value
+							document.getElementById("generationInfo").value = "Generation: " + generation + " fitness: " + fitness;
+						}
+						generation++;
+					}
+				}, 0);
+			}
+			mask.src="rainbowEyeMask.jpg";
+
+		};
+		img.src = "rainbowEye.jpg"
+	}
+	</script>
+</head>
+<body onload="init();">
+<label><input id="run" type="checkbox" value="Run">Run?</label>
+<div id="wrapper">
+	<div>
+		<canvas id="imgCanvas" width="400" height="400" style="border:1px solid #000000; float: left;">
+		Your browser does not support the HTML5 canvas tag.
+		</canvas>
+	</div>
+
+	<div>
+		<canvas id="solutionCanvas" width="400" height="400" style="border:1px solid #000000; overflow:hidden;">
+		Your browser does not support the HTML5 canvas tag.
+		</canvas>
+	</div>
+</div>
+
+<textarea id="generationInfo" rows="2000" style="height: 20px; width: 600px">
+</textarea>
+
+<div>
+	<canvas id="tempCanvas" width="400" height="400" style="border:1px solid #000000; visibility: hidden;">
+	Your browser does not support the HTML5 canvas tag.
+	</canvas>
+</div>
+
+<div>
+	<canvas id="maskCanvas" width="400" height="400" style="border:1px solid #000000; visibility: hidden;">
+	Your browser does not support the HTML5 canvas tag.
+	</canvas>
+</div>
+
+</body>
+</html>
